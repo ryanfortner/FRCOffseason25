@@ -1,0 +1,42 @@
+{
+  "robotWidth": 0.826,
+  "robotLength": 0.927,
+  "holonomicMode": true,
+  "pathFolders": [
+    "Left Paths",
+    "Center Paths",
+    "Right Paths"
+  ],
+  "autoFolders": [
+    "1 Coral",
+    "2 Coral",
+    "Test Sequences"
+  ],
+  "defaultMaxVel": 4.5,
+  "defaultMaxAccel": 10.0,
+  "defaultMaxAngVel": 360.0,
+  "defaultMaxAngAccel": 720.0,
+  "defaultNominalVoltage": 12.0,
+  "robotMass": 70.0,
+  "robotMOI": 6.883,
+  "robotTrackwidth": 0.546,
+  "driveWheelRadius": 0.051,
+  "driveGearing": 5.9,
+  "maxDriveSpeed": 5.0,
+  "driveMotorType": "vortex",
+  "driveCurrentLimit": 120.0,
+  "wheelCOF": 1.542,
+  "flModuleX": 0.314,
+  "flModuleY": 0.264,
+  "frModuleX": 0.314,
+  "frModuleY": -0.264,
+  "blModuleX": -0.314,
+  "blModuleY": 0.264,
+  "brModuleX": -0.314,
+  "brModuleY": -0.264,
+  "bumperOffsetX": 0.0,
+  "bumperOffsetY": 0.0,
+  "robotFeatures": [
+    "{\"name\":\"Line\",\"type\":\"line\",\"data\":{\"start\":{\"x\":0.2,\"y\":0.0},\"end\":{\"x\":0.4,\"y\":0.0},\"strokeWidth\":0.02}}"
+  ]
+}
