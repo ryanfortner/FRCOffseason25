@@ -21,9 +21,9 @@ public class PIDSwerve extends Command {
   final double maxLinearVelocityMetersPerSec = 1;
   final double maxAngularVelocityRadPerSec = 5.0;
 
-  private Drivetrain drivetrain;
+  private final Drivetrain drivetrain;
   private final Pose2d goalPose;
-  private PPHolonomicDriveController driveController = new PPHolonomicDriveController(
+  private final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
     new PIDConstants(5.0, 0, 0), 
     new PIDConstants(5.0, 0, 0)
   );

@@ -54,7 +54,7 @@ public class Robot extends LoggedRobot {
     m_robotContainer = new RobotContainer();
 
     // AdvantageKit logging setup...
-    Logger.recordMetadata("ProjectName", "WonkoTheSane"); // Set a metadata value
+    Logger.recordMetadata("ProjectName", "Offseason25"); // Set a metadata value
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
     Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
@@ -83,7 +83,7 @@ public class Robot extends LoggedRobot {
     
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
 
-    // for the drivercam: attach USB camera to Rio
+    // for the driver cam: attach USB camera to Rio
     // CameraServer.startAutomaticCapture();
     
     // DO THIS AFTER CONFIGURATION OF YOUR DESIRED PATHFINDER

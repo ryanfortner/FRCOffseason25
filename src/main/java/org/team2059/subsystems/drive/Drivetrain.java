@@ -4,13 +4,12 @@
 
 package org.team2059.subsystems.drive;
 
+import edu.wpi.first.math.kinematics.*;
 import org.littletonrobotics.junction.Logger;
 import org.team2059.Constants;
 import org.team2059.Constants.AutoConstants;
 import org.team2059.Constants.DrivetrainConstants;
-import org.team2059.Constants.VisionConstants;
 import org.team2059.routines.DrivetrainRoutine;
-import org.team2059.subsystems.vision.Vision;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -21,10 +20,6 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -39,18 +34,16 @@ public class Drivetrain extends SubsystemBase {
   public final SwerveModule backLeft;
   public final SwerveModule backRight;
 
-  private GyroIO gyro;
-  private GyroIOInputsAutoLogged gyroInputs;
+  private final GyroIO gyro;
+  private final GyroIOInputsAutoLogged gyroInputs;
 
-  private SwerveDrivePoseEstimator poseEstimator;
-
-  private final Vision vision;
+  private final SwerveDriveOdometry odometry;
 
   public final DrivetrainRoutine routine;
 
-  private Field2d field = new Field2d();
+  private final Field2d field = new Field2d();
 
-  public Drivetrain(Vision vision, GyroIO gyro) {
+  public Drivetrain(GyroIO gyro) {
 
     /*
      * Construct four SwerveModules
@@ -124,8 +117,6 @@ public class Drivetrain extends SubsystemBase {
             0.27832,
             0.0));
 
-    this.vision = vision;
-
     // Gyro keeps track of field-relative rotation
     this.gyro = gyro;
     gyroInputs = new GyroIOInputsAutoLogged(); // these inputs allow for us to get values from the gyro
@@ -153,16 +144,7 @@ public class Drivetrain extends SubsystemBase {
     // SysID routine
     routine = new DrivetrainRoutine(this);
 
-    // Estimates our pose on the field using vision, if available.
-    // Behaves just like SwerveDriveOdometry, just with optional vision
-    // measurements.
-    poseEstimator = new SwerveDrivePoseEstimator(
-        DrivetrainConstants.kinematics,
-        getHeading(),
-        getModulePositions(),
-        new Pose2d(),
-        VisionConstants.stateStdDevs,
-        VisionConstants.measurementStdDevs);
+    odometry = new SwerveDriveOdometry(DrivetrainConstants.kinematics, new Rotation2d(), getModulePositions());
 
     // Configure auto builder last
     configureAutoBuilder();
@@ -181,7 +163,7 @@ public class Drivetrain extends SubsystemBase {
    * @return Current robot pose in meters
    */
   public Pose2d getPose() {
-    return poseEstimator.getEstimatedPosition();
+    return odometry.getPoseMeters();
   }
 
   /**
@@ -191,16 +173,14 @@ public class Drivetrain extends SubsystemBase {
    * @param pose specified Pose2d
    */
   public void resetOdometry(Pose2d pose) {
-    poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
+    odometry.resetPosition(getHeading(), getModulePositions(), pose);
   }
 
   /**
    * @return ChassisSpeeds of current robot-relative speeds
    */
   public ChassisSpeeds getRobotRelativeSpeeds() {
-    ChassisSpeeds chassisSpeeds = DrivetrainConstants.kinematics.toChassisSpeeds(getStates());
-
-    return chassisSpeeds;
+    return DrivetrainConstants.kinematics.toChassisSpeeds(getStates());
   }
 
   /**
@@ -221,7 +201,8 @@ public class Drivetrain extends SubsystemBase {
    * @return current swerve module positions in SwerveModulePosition[] array
    */
   public SwerveModulePosition[] getModulePositions() {
-    SwerveModulePosition[] positions = {
+
+    return new SwerveModulePosition[]{
         new SwerveModulePosition(frontLeft.inputs.drivePosition,
             new Rotation2d(frontLeft.inputs.rotationAbsolutePositionRadians)),
         new SwerveModulePosition(frontRight.inputs.drivePosition,
@@ -231,8 +212,6 @@ public class Drivetrain extends SubsystemBase {
         new SwerveModulePosition(backRight.inputs.drivePosition,
             new Rotation2d(backRight.inputs.rotationAbsolutePositionRadians))
     };
-
-    return positions;
   }
 
   /**
@@ -407,30 +386,8 @@ public class Drivetrain extends SubsystemBase {
       stopAllMotors();
     }
 
-    // if (!RobotContainer.upperCamSwitch.getAsBoolean()) {
-      var upperOptional = vision.io.getEstimatedUpperGlobalPose();
-
-      if (upperOptional.isPresent() && vision.io.getUpperCurrentStdDevs() != null) {
-        poseEstimator.addVisionMeasurement(
-            upperOptional.get().estimatedPose.toPose2d(),
-            upperOptional.get().timestampSeconds,
-            vision.io.getUpperCurrentStdDevs()
-        );
-      }
-    // }
-    // if (!RobotContainer.lowerCamSwitch.getAsBoolean()) {
-      var lowerOptional = vision.io.getEstimatedLowerGlobalPose();
-      if (lowerOptional.isPresent() && vision.io.getLowerCurrentStdDevs() != null) {
-        poseEstimator.addVisionMeasurement(
-            lowerOptional.get().estimatedPose.toPose2d(),
-            lowerOptional.get().timestampSeconds,
-            vision.io.getLowerCurrentStdDevs()
-        );
-      }
-    // }
-
     // Update pose estimator as if it were simply Odometry
-    poseEstimator.update(getHeading(), getModulePositions());
+    odometry.update(getHeading(), getModulePositions());
 
     // Logging
     Logger.recordOutput("Pose", getPose());
