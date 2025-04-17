@@ -9,6 +9,7 @@ import org.littletonrobotics.junction.Logger;
 import org.team2059.Constants;
 import org.team2059.Constants.AutoConstants;
 import org.team2059.Constants.DrivetrainConstants;
+import org.team2059.QuestNav;
 import org.team2059.routines.DrivetrainRoutine;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -41,7 +42,9 @@ public class Drivetrain extends SubsystemBase {
 
   public final DrivetrainRoutine routine;
 
-  private final Field2d field = new Field2d();
+  private final Field2d field;
+
+  private QuestNav questNav;
 
   public Drivetrain(GyroIO gyro) {
 
@@ -144,10 +147,18 @@ public class Drivetrain extends SubsystemBase {
     // SysID routine
     routine = new DrivetrainRoutine(this);
 
-    odometry = new SwerveDriveOdometry(DrivetrainConstants.kinematics, new Rotation2d(), getModulePositions());
+    questNav = new QuestNav();
+
+    odometry = new SwerveDriveOdometry(
+      DrivetrainConstants.kinematics,
+      questNav.getPose().getRotation(),
+      getModulePositions()
+    );
 
     // Configure auto builder last
     configureAutoBuilder();
+
+    field = new Field2d();
 
     PathPlannerLogging.setLogTargetPoseCallback((pose) -> { // target pose
       field.getObject("target pose").setPose(pose);
@@ -157,6 +168,8 @@ public class Drivetrain extends SubsystemBase {
     });
 
     SmartDashboard.putData(field);
+
+    questNav.zeroHeading();
   }
 
   /**
@@ -387,7 +400,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     // Update pose estimator as if it were simply Odometry
-    odometry.update(getHeading(), getModulePositions());
+    odometry.update(questNav.getPose().getRotation(), getModulePositions());
 
     // Logging
     Logger.recordOutput("Pose", getPose());
