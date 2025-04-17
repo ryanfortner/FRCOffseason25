@@ -207,7 +207,7 @@ public class Drivetrain extends SubsystemBase {
    * @return Rotation2d of current navX heading
    */
   public Rotation2d getHeading() {
-    return Rotation2d.fromDegrees(-gyroInputs.yaw);
+    return questNav.getPose().getRotation();
   }
 
   /**
