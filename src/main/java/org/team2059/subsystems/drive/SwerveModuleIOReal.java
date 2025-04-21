@@ -9,10 +9,10 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -21,8 +21,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 
 public class SwerveModuleIOReal implements SwerveModuleIO {
-    private final SparkFlex driveMotor;
-    private final SparkFlex rotationMotor;
+    private final SparkMax driveMotor;
+    private final SparkMax rotationMotor;
 
     private final RelativeEncoder driveEncoder;
     private final RelativeEncoder rotationEncoder;
@@ -49,8 +49,8 @@ public class SwerveModuleIOReal implements SwerveModuleIO {
         double kP
     ) {
         // Motor controllers
-        driveMotor = new SparkFlex(driveMotorId, MotorType.kBrushless);
-        rotationMotor = new SparkFlex(rotationMotorId, MotorType.kBrushless);
+        driveMotor = new SparkMax(driveMotorId, MotorType.kBrushless);
+        rotationMotor = new SparkMax(rotationMotorId, MotorType.kBrushless);
 
         // Configure motor controllers
         configureSpark(
@@ -101,13 +101,13 @@ public class SwerveModuleIOReal implements SwerveModuleIO {
      * @param velocityConversionFactor MotorRotations x [This factor] = units/sec
      */
     private void configureSpark(
-        SparkFlex spark, 
+        SparkMax spark,
         boolean inverted, 
         IdleMode idleMode,
         double positionConversionFactor,
         double velocityConversionFactor
     ) {
-      SparkFlexConfig config = new SparkFlexConfig();
+      SparkMaxConfig config = new SparkMaxConfig();
 
       config 
         .inverted(inverted)
@@ -174,16 +174,16 @@ public class SwerveModuleIOReal implements SwerveModuleIO {
     }
 
     /**
-     * @return SparkFlex drive motor object
+     * @return SparkMax drive motor object
      */
-    public SparkFlex getDriveMotor() {
+    public SparkMax getDriveMotor() {
         return driveMotor;
     }
 
     /**
-     * @return SparkFlex rotation motor object
+     * @return SparkMax rotation motor object
      */
-    public SparkFlex getRotationMotor() {
+    public SparkMax getRotationMotor() {
         return rotationMotor;
     }
 

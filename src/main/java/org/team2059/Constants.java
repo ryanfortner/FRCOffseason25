@@ -108,12 +108,12 @@ public final class Constants {
     // Given Motor Rotations, convert to Meters traveled
     // (pi * d) / (Gear Ratio)
     // where d is wheel diameter, in meters
-    public static final double driveEncoderPositionConversionFactor = 0.05409929044;
+    public static final double driveEncoderPositionConversionFactor = (Math.PI * Units.inchesToMeters(4)) / (6.75);
     // Given Motor RPM, convert to Meters/second
     public static final double driveEncoderVelocityConversionFactor = driveEncoderPositionConversionFactor / 60.0;
     // Given Motor Rotations, convert to Radians
     // (2 * pi) / (Gear Ratio)
-    public static final double rotationEncoderPositionConversionFactor = 0.3351032164;
+    public static final double rotationEncoderPositionConversionFactor = 14.0 * Math.PI / 150.0;
     // Given Motor RPM, convert to Radians/second
     public static final double rotationEncoderVelocityConversionFactor = rotationEncoderPositionConversionFactor / 60.0;
 
@@ -128,25 +128,25 @@ public final class Constants {
      */
 
     // front left
-    public static final int frontLeftDriveMotorId = 1;
-    public static final int frontLeftRotationMotorId = 2;
+    public static final int frontLeftDriveMotorId = 4;
+    public static final int frontLeftRotationMotorId = 3;
     public static final int frontLeftCanCoderId = 10;
-    public static final double frontLeftOffsetRad = 0.416260 * 2 * Math.PI;
+    public static final double frontLeftOffsetRad = 0.486572 * 2 * Math.PI;
     // front right
-    public static final int frontRightDriveMotorId = 3;
-    public static final int frontRightRotationMotorId = 4;
+    public static final int frontRightDriveMotorId = 5;
+    public static final int frontRightRotationMotorId = 6;
     public static final int frontRightCanCoderId = 20;
-    public static final double frontRightOffsetRad = 0.978760 * 2 * Math.PI;
+    public static final double frontRightOffsetRad = 0.740479 * 2 * Math.PI;
     // back left
-    public static final int backLeftDriveMotorId = 5;
-    public static final int backLeftRotationMotorId = 6;
+    public static final int backLeftDriveMotorId = 8;
+    public static final int backLeftRotationMotorId = 7;
     public static final int backLeftCanCoderId = 30;
-    public static final double backLeftOffsetRad = 0.831787 * 2 * Math.PI;
+    public static final double backLeftOffsetRad = 0.043213 * 2 * Math.PI;
     // back right
-    public static final int backRightDriveMotorId = 7;
-    public static final int backRightRotationMotorId = 8;
+    public static final int backRightDriveMotorId = 1;
+    public static final int backRightRotationMotorId = 2;
     public static final int backRightCanCoderId = 40;
-    public static final double backRightOffsetRad = 0.136719 * 2 * Math.PI;
+    public static final double backRightOffsetRad = 0.369141 * 2 * Math.PI;
 
     /* ======== */
     /* MAXIMUMS */
