@@ -74,7 +74,7 @@ public class Drivetrain extends SubsystemBase {
             DrivetrainConstants.frontLeftRotationMotorId,
             DrivetrainConstants.frontLeftCanCoderId,
             DrivetrainConstants.frontLeftOffsetRad,
-            false,
+            true,
             true,
             0.18707,
             1.972,
@@ -87,7 +87,7 @@ public class Drivetrain extends SubsystemBase {
             DrivetrainConstants.frontRightRotationMotorId,
             DrivetrainConstants.frontRightCanCoderId,
             DrivetrainConstants.frontRightOffsetRad,
-            false,
+            true,
             true,
             0.17367,
             2.0218,
@@ -100,7 +100,7 @@ public class Drivetrain extends SubsystemBase {
             DrivetrainConstants.backLeftRotationMotorId,
             DrivetrainConstants.backLeftCanCoderId,
             DrivetrainConstants.backLeftOffsetRad,
-            false,
+            true,
             true,
             0.1846,
             1.9744,
@@ -113,7 +113,7 @@ public class Drivetrain extends SubsystemBase {
             DrivetrainConstants.backRightRotationMotorId,
             DrivetrainConstants.backRightCanCoderId,
             DrivetrainConstants.backRightOffsetRad,
-            false,
+            true,
             true,
             0.16226,
             2.0166,
@@ -200,7 +200,11 @@ public class Drivetrain extends SubsystemBase {
    * Set navX heading to zero
    */
   public void zeroHeading() {
-    gyro.reset();
+    questNav.zeroHeading();
+  }
+
+  public void zeroPosition() {
+    questNav.zeroPosition();
   }
 
   /**
@@ -387,6 +391,11 @@ public class Drivetrain extends SubsystemBase {
     gyro.set180Rotation(enabled);
   }
 
+  public void cleanupQuestNavMessages() {
+    questNav.processHeartbeat();
+    questNav.cleanUpQuestNavMessages();
+  }
+
   @Override
   public void periodic() {
 
@@ -407,6 +416,10 @@ public class Drivetrain extends SubsystemBase {
     field.setRobotPose(getPose());
     Logger.recordOutput("Field-Relative?", fieldRelativeStatus);
     Logger.recordOutput("Real States", getStates());
+
+    Logger.recordOutput("QuestNavPos", questNav.getPose());
+
+    Logger.recordOutput("QuestBattery", questNav.getBatteryPercent());
   }
 
 }

@@ -12,6 +12,7 @@ import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
+import org.team2059.subsystems.drive.Drivetrain;
 import org.team2059.util.LocalADStarAK;
 
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -117,6 +118,8 @@ public class Robot extends LoggedRobot {
     } catch (NullPointerException ex) {
       System.out.println("error");
     }
+
+    m_robotContainer.getDrivetrainSubsystem().cleanupQuestNavMessages();
 
     CommandScheduler.getInstance().run();
   }

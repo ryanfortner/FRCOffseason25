@@ -177,6 +177,9 @@ public class RobotContainer {
       /* SWITCH FIELD/ROBOT RELATIVITY IN TELEOP */
       new JoystickButton(logitech, OperatorConstants.JoystickRobotRelative)
         .whileTrue(new InstantCommand(() -> drivetrain.setFieldRelativity()));
+
+      new JoystickButton(logitech, 12)
+        .whileTrue(new InstantCommand(() -> drivetrain.zeroPosition()));
     }
 
     /* ========== */
@@ -195,6 +198,10 @@ public class RobotContainer {
     // new JoystickButton(buttonBox, 4)
     //   .whileTrue(drivetrain.routine.dynamicReverse());
 
+   }
+
+   public Drivetrain getDrivetrainSubsystem() {
+    return drivetrain;
    }
   
   /**
