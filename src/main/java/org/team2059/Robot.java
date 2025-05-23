@@ -119,8 +119,6 @@ public class Robot extends LoggedRobot {
       System.out.println("error");
     }
 
-    m_robotContainer.getDrivetrainSubsystem().cleanupQuestNavMessages();
-
     CommandScheduler.getInstance().run();
   }
 

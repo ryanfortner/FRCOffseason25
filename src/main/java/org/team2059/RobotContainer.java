@@ -100,7 +100,7 @@ public class RobotContainer {
           drivetrain,
           () -> -logitech.getRawAxis(OperatorConstants.JoystickTranslationAxis), // forwardX
           () -> -logitech.getRawAxis(OperatorConstants.JoystickStrafeAxis), // forwardY
-          () -> -logitech.getRawAxis(OperatorConstants.JoystickRotationAxis), // rotation
+          () -> logitech.getRawAxis(OperatorConstants.JoystickRotationAxis), // rotation
           () -> logitech.getRawAxis(OperatorConstants.JoystickSliderAxis), // slider
           () -> logitech.getRawButton(OperatorConstants.JoystickStrafeOnly), // Strafe Only Button
           () -> logitech.getRawButton(OperatorConstants.JoystickInvertedDrive) // Inverted buytton
@@ -176,10 +176,7 @@ public class RobotContainer {
 
       /* SWITCH FIELD/ROBOT RELATIVITY IN TELEOP */
       new JoystickButton(logitech, OperatorConstants.JoystickRobotRelative)
-        .whileTrue(new InstantCommand(() -> drivetrain.setFieldRelativity()));
-
-      new JoystickButton(logitech, 12)
-        .whileTrue(new InstantCommand(() -> drivetrain.zeroPosition()));
+        .whileTrue(new InstantCommand(() -> drivetrain.zeroPose()));
     }
 
     /* ========== */

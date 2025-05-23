@@ -14,10 +14,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -25,6 +22,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Time;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -35,7 +33,58 @@ import edu.wpi.first.units.measure.Distance;
  * constants are needed, to reduce verbosly.
  */
 public final class Constants {
-  
+
+  public static class OculusConstants {
+    public static final Time connectionTimeout = Milliseconds.of(350);
+
+    /**
+     * Standard deviations representing how much we "trust" the position from the Oculus. By default,
+     * the Quest 3 provides sub-centimeter accuracy. Values represent: [0]: X position trust (50mm)
+     * [1]: Y position trust (50mm) [2]: Rotation trust (~2.87 degrees)
+     */
+    public static final Matrix<N3, N1> stdDevs = VecBuilder.fill(
+      0.02, // Trust down to 50mm
+      0.02, // Trust down to 50mm
+      0.0872665
+      // 5deg
+    );
+
+    /**
+     * Transform from the robot center to the headset. Coordinate system: - X: Positive is forwards -
+     * Y: Positive is left - Rotation: Positive is counter-clockwise
+     */
+    public static final Transform2d ROBOT_TO_OCULUS =
+      new Transform2d(0.25, 0.0, Rotation2d.fromDegrees(0));
+
+    public class Miso {
+      /** Status indicating system is ready for commands */
+      public static final int STATUS_READY = 0;
+
+      /** Status indicating heading reset completion */
+      public static final int STATUS_HEADING_RESET_COMPLETE = 99;
+
+      /** Status indicating pose reset completion */
+      public static final int STATUS_POSE_RESET_COMPLETE = 98;
+
+      /** Status indicating ping response receipt */
+      public static final int STATUS_PING_RESPONSE = 97;
+    }
+
+    public class Mosi {
+      /** Clear status */
+      public static final int COMMAND_CLEAR = 0;
+
+      /** Command to reset the heading */
+      public static final int COMMAND_RESET_HEADING = 1;
+
+      /** Command to reset the pose */
+      public static final int COMMAND_RESET_POSE = 2;
+
+      /** Command to ping the system */
+      public static final int COMMAND_PING = 3;
+    }
+  }
+
   public static class OperatorConstants {
 
     // Sets whether or not tunable numbers can be changed. If false, only defaults will be used.

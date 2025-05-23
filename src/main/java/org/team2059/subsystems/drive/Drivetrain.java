@@ -9,7 +9,6 @@ import org.littletonrobotics.junction.Logger;
 import org.team2059.Constants;
 import org.team2059.Constants.AutoConstants;
 import org.team2059.Constants.DrivetrainConstants;
-import org.team2059.QuestNav;
 import org.team2059.routines.DrivetrainRoutine;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -18,13 +17,13 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.team2059.subsystems.oculus.QuestNav;
 
 public class Drivetrain extends SubsystemBase {
 
@@ -36,7 +35,7 @@ public class Drivetrain extends SubsystemBase {
   public final SwerveModule backRight;
 
   private final GyroIO gyro;
-  private final GyroIOInputsAutoLogged gyroInputs;
+  private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
   private final SwerveDriveOdometry odometry;
 
@@ -44,7 +43,7 @@ public class Drivetrain extends SubsystemBase {
 
   private final Field2d field;
 
-  private QuestNav questNav;
+  private final QuestNav questNav = new QuestNav();
 
   public Drivetrain(GyroIO gyro) {
 
@@ -120,9 +119,14 @@ public class Drivetrain extends SubsystemBase {
             0.27832,
             0.0));
 
+    odometry = new SwerveDriveOdometry(
+      DrivetrainConstants.kinematics,
+      getHeading(),
+      getModulePositions()
+    );
+
     // Gyro keeps track of field-relative rotation
     this.gyro = gyro;
-    gyroInputs = new GyroIOInputsAutoLogged(); // these inputs allow for us to get values from the gyro
     new Thread(() -> { // gyro may need an extra second to start...
       try {
         Thread.sleep(1000);
@@ -147,14 +151,6 @@ public class Drivetrain extends SubsystemBase {
     // SysID routine
     routine = new DrivetrainRoutine(this);
 
-    questNav = new QuestNav();
-
-    odometry = new SwerveDriveOdometry(
-      DrivetrainConstants.kinematics,
-      questNav.getPose().getRotation(),
-      getModulePositions()
-    );
-
     // Configure auto builder last
     configureAutoBuilder();
 
@@ -168,8 +164,6 @@ public class Drivetrain extends SubsystemBase {
     });
 
     SmartDashboard.putData(field);
-
-    questNav.zeroHeading();
   }
 
   /**
@@ -197,21 +191,39 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
-   * Set navX heading to zero
+   * Set reported heading to zero
    */
   public void zeroHeading() {
-    questNav.zeroHeading();
-  }
-
-  public void zeroPosition() {
-    questNav.zeroPosition();
+    questNav.setHeading(0);
   }
 
   /**
-   * @return Rotation2d of current navX heading
+   * Set reported heading to an arbitrary value - be careful!
+   */
+  public void setHeading(double degrees) {
+    questNav.setHeading(degrees);
+  }
+
+  /**
+   * Syncs Quest with onboard IMU (this should be called every once in a while, not in every periodic loop)
+   */
+  public void syncQuestHeading() {
+    questNav.setHeading(-gyroInputs.yaw);
+  }
+
+  /**
+   * @return Rotation2d of current reported heading
    */
   public Rotation2d getHeading() {
-    return questNav.getPose().getRotation();
+    return Rotation2d.fromDegrees(-gyroInputs.yaw);
+  }
+
+  public void zeroPose() {
+    questNav.setPose(Pose2d.kZero);
+  }
+
+  public void setPose(Pose2d targetPose) {
+    questNav.setPose(targetPose);
   }
 
   /**
@@ -391,11 +403,6 @@ public class Drivetrain extends SubsystemBase {
     gyro.set180Rotation(enabled);
   }
 
-  public void cleanupQuestNavMessages() {
-    questNav.processHeartbeat();
-    questNav.cleanUpQuestNavMessages();
-  }
-
   @Override
   public void periodic() {
 
@@ -409,7 +416,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     // Update pose estimator as if it were simply Odometry
-    odometry.update(questNav.getPose().getRotation(), getModulePositions());
+    odometry.update(getHeading(), getModulePositions());
 
     // Logging
     Logger.recordOutput("Pose", getPose());
@@ -417,9 +424,10 @@ public class Drivetrain extends SubsystemBase {
     Logger.recordOutput("Field-Relative?", fieldRelativeStatus);
     Logger.recordOutput("Real States", getStates());
 
-    Logger.recordOutput("QuestNavPos", questNav.getPose());
+    questNav.processHeartbeat();
+    questNav.cleanupResponses();
 
-    Logger.recordOutput("QuestBattery", questNav.getBatteryPercent());
+    Logger.recordOutput("QuestPose", questNav.getPose());
+    Logger.recordOutput("QuestYaw", questNav.getYaw());
   }
-
 }
