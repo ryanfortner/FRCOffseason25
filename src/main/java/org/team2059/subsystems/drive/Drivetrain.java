@@ -17,6 +17,8 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -37,13 +39,15 @@ public class Drivetrain extends SubsystemBase {
   private final GyroIO gyro;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
-  private final SwerveDriveOdometry odometry;
+  // private final SwerveDriveOdometry odometry;
 
   public final DrivetrainRoutine routine;
 
   private final Field2d field;
 
   private final QuestNav questNav = new QuestNav();
+
+  private final SwerveDrivePoseEstimator poseEstimator; 
 
   public Drivetrain(GyroIO gyro) {
 
@@ -119,11 +123,14 @@ public class Drivetrain extends SubsystemBase {
             0.27832,
             0.0));
 
-    odometry = new SwerveDriveOdometry(
-      DrivetrainConstants.kinematics,
-      getHeading(),
-      getModulePositions()
-    );
+    // odometry = new SwerveDriveOdometry(
+    //   DrivetrainConstants.kinematics,
+    //   getHeading(),
+    //   getModulePositions()
+    // );
+
+    poseEstimator = 
+      new SwerveDrivePoseEstimator(DrivetrainConstants.kinematics, getHeading(), getModulePositions(), new Pose2d()); 
 
     // Gyro keeps track of field-relative rotation
     this.gyro = gyro;
@@ -170,7 +177,7 @@ public class Drivetrain extends SubsystemBase {
    * @return Current robot pose in meters
    */
   public Pose2d getPose() {
-    return odometry.getPoseMeters();
+    return poseEstimator.getEstimatedPosition();
   }
 
   /**
@@ -180,7 +187,8 @@ public class Drivetrain extends SubsystemBase {
    * @param pose specified Pose2d
    */
   public void resetOdometry(Pose2d pose) {
-    odometry.resetPosition(getHeading(), getModulePositions(), pose);
+    // odometry.resetPosition(getHeading(), getModulePositions(), pose);
+    poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
   }
 
   /**
@@ -220,6 +228,7 @@ public class Drivetrain extends SubsystemBase {
 
   public void zeroPose() {
     questNav.setPose(Pose2d.kZero);
+    poseEstimator.resetPose(new Pose2d());
   }
 
   public void setPose(Pose2d targetPose) {
@@ -415,8 +424,12 @@ public class Drivetrain extends SubsystemBase {
       stopAllMotors();
     }
 
-    // Update pose estimator as if it were simply Odometry
-    odometry.update(getHeading(), getModulePositions());
+    
+    poseEstimator.addVisionMeasurement(getPose(), questNav.getTimestamp(), Constants.OculusConstants.stdDevs);
+
+    poseEstimator.updateWithTime(questNav.getTimestamp(), getHeading(), getModulePositions());
+    
+
 
     // Logging
     Logger.recordOutput("Pose", getPose());
